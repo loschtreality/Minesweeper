@@ -8,6 +8,19 @@ class Tile
     @display_value = "[]"
   end
 
+  def self.create_tiles(number_tiles, number_bombs)
+    tile_list = []
+    number_bombs.times do
+      tile_list << Tile.new(true)
+    end
+
+    (number_tiles - number_bombs).times do
+      tile_list << Tile.new
+    end
+    
+    tile_list
+  end
+
   def reveal
     @hidden = false
     # display bomb_count or display bomb
