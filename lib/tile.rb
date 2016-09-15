@@ -1,5 +1,5 @@
 class Tile
-  attr_reader :is_bomb
+  attr_reader :is_bomb, :neighbors, :flagged, :display_value
 
   def initialize(is_bomb = false)
     @hidden = true
@@ -17,7 +17,7 @@ class Tile
     (number_tiles - number_bombs).times do
       tile_list << Tile.new
     end
-    
+
     tile_list
   end
 

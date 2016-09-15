@@ -16,6 +16,15 @@ class Board
     end
   end
 
+  def find_card_neighbors
+    @board.each_with_index do |row,row_idx|
+      row.each_index do |col|
+        neighbor_list = get_neighbors([row_idx, col]).map { |coord| self[coord] }
+        self[[row_idx,col]].set_neighbors(neighbor_list)
+      end
+    end
+  end
+
   def [](pos)
     row, col = pos
     @board[row][col]
@@ -26,24 +35,50 @@ class Board
   end
 
   def uncover_tiles(pos)
-    #for each pos, find the neighbors and send it to tile.set_neighbors
-    #if tile at pos == 0 then go through each neighbor and reveal
-    #if neighbor tile == 0 repeat
-    #only reveal if not bomb or flagged: Stop if bomb, flagged, or n > 1
+    byebug
+    current_tile = self[pos]
+    current_tile.set_neighbors(get_neighbors(pos))
+
+    current_tile.reveal
+    return false if current_tile.is_bomb
+
+    if current_tile.neighbor_bomb_count.zero?
+      current_tile.neighbors.each do |neighbor|
+        display_neighbor(neighbor)
+      end
+    end
+  end
+
+  def display_neighbor(pos)
+    unless self[pos].is_bomb || self[pos].flagged
+      uncover_tiles(pos)
+    end
   end
 
   def get_neighbors(pos)
     surrounding = []
     row, col = pos
-    surrounding << [row + 1, col + 1] if valid_position?([row + 1, col + 1])
-    surrounding << [row + 1, col] if valid_position?([row + 1, col])
-    surrounding << [row + 1, col - 1] if valid_position?([row + 1, col - 1])
-    surrounding << [row, col - 1] if valid_position?([row, col - 1])
-    surrounding << [row, col + 1] if valid_position?([row, col + 1])
-    surrounding << [row - 1, col + 1] if valid_position?([row - 1, col + 1])
-    surrounding << [row - 1, col] if valid_position?([row - 1, col])
-    surrounding << [row - 1, col - 1] if valid_position?([row - 1, col - 1])
+
+    [[1, -1], [-1, 1]].each do |op|
+      surrounding << [row + op.first, col + op.last]
+      surrounding << [row + op.first, col ]
+      surrounding << [row , col + op.last]
+      surrounding << [row + op.first, col - op.last]
+    end
+
+    surrounding.select { |pos| valid_position?(pos) }.sort
   end
+
+  def display
+    puts "  #{(0...@board.count).to_a.join("   ")}"
+    @board.each_with_index.map do |row, i|
+      row.map do |col, i|
+         "#{col.display_value} "
+      end.unshift("#{i}").join(" ")
+    end.join("\n")
+    #display board through tile.display_value
+  end
+
 
 
   def valid_position?(pos)
