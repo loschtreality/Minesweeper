@@ -4,6 +4,7 @@ class Board
   def initialize(columns = 9, rows = 9, number_of_bombs = 10 )
     board = Array.new(rows) { Array.new(columns, nil) }
     @board = board_setup(board, number_of_bombs)
+    find_card_neighbors
   end
 
   def board_setup(grid, number_of_bombs)
@@ -34,11 +35,7 @@ class Board
     self[pos].reveal
   end
 
-  def uncover_tiles(pos)
-    byebug
-    current_tile = self[pos]
-    current_tile.set_neighbors(get_neighbors(pos))
-
+  def uncover_tiles(current_tile)
     current_tile.reveal
     return false if current_tile.is_bomb
 
@@ -49,9 +46,9 @@ class Board
     end
   end
 
-  def display_neighbor(pos)
-    unless self[pos].is_bomb || self[pos].flagged
-      uncover_tiles(pos)
+  def display_neighbor(tile)
+    unless tile.is_bomb || tile.flagged || !tile.hidden
+      uncover_tiles(tile)
     end
   end
 
